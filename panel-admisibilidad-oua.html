@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel de admisibilidad — Concurso OUA (CNR)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Public+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#ECEFF0; --surface:#FFFFFF; --ink:#16202B; --ink-2:#54616C; --ink-3:#8A949D;
+  --line:rgba(20,28,38,0.10); --line-2:rgba(20,28,38,0.18);
+  --agua:#0E6E7A; --agua-soft:#E3F0F1;
+  --ok:#1D9E75; --ok-ink:#0C5A43; --ok-soft:#E4F4EC;
+  --obs:#D98A0E; --obs-ink:#7A4D06; --obs-soft:#FAF0DA;
+  --no:#D24B43; --no-ink:#7E211C; --no-soft:#FBE7E5;
+  --radius:11px; --radius-sm:8px;
+  --font-display:'Fraunces',Georgia,'Times New Roman',serif;
+  --font-sans:'Public Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-sans);
+  font-feature-settings:'tnum' 1;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 20px 48px}
+a{color:var(--agua)}
+
+/* masthead */
+.mast{border-bottom:2px solid var(--agua);padding-bottom:16px;margin-bottom:18px}
+.eyebrow{font-size:12.5px;color:var(--agua);font-weight:500;letter-spacing:.01em;margin:0 0 6px}
+.mast h1{font-family:var(--font-display);font-weight:500;font-size:38px;line-height:1.05;margin:0;letter-spacing:-.01em}
+.mast .sub{color:var(--ink-2);font-size:15px;margin:7px 0 0;max-width:60ch}
+
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0 4px}
+.controls .grow{flex:1 1 auto}
+select,.btn{font-family:inherit;font-size:13.5px;color:var(--ink);background:var(--surface);
+  border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:8px 11px;cursor:pointer;height:38px}
+select:hover,.btn:hover{border-color:var(--agua)}
+.btn{display:inline-flex;align-items:center;gap:6px}
+.btn.primary{background:var(--agua);color:#fff;border-color:var(--agua)}
+.btn.primary:hover{background:#0b5a64}
+.field{display:flex;flex-direction:column;gap:3px}
+.field label{font-size:11.5px;color:var(--ink-3);padding-left:2px}
+.status{font-size:13px;color:var(--ink-2);margin:12px 0 0;display:flex;align-items:center;gap:7px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--agua);display:inline-block;flex:none}
+
+/* ledger / KPIs */
+.ledger{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin:14px 0 16px}
+.cell{padding:16px 18px;border-left:1px solid var(--line)}
+.cell:first-child{border-left:none}
+.cell .k-l{font-size:12.5px;color:var(--ink-2);margin:0}
+.cell .k-v{font-family:var(--font-display);font-weight:500;font-size:30px;line-height:1.1;margin:6px 0 2px}
+.cell .k-s{font-size:12px;color:var(--ink-3);margin:0}
+
+/* panels */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;min-width:0}
+.span2{grid-column:1 / -1}
+.panel h3{font-size:13.5px;font-weight:500;color:var(--ink-2);margin:0 0 14px;letter-spacing:.005em}
+.hint{font-size:13px;color:var(--ink-3);background:var(--bg);border:1px dashed var(--line-2);
+  border-radius:var(--radius-sm);padding:14px;line-height:1.45}
+.chart-wrap{position:relative;width:100%}
+
+/* legend */
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--ink-2);margin-bottom:12px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:11px;height:11px;border-radius:3px;flex:none}
+
+/* tipo bars */
+.bars{display:flex;flex-direction:column;gap:15px;margin-top:2px}
+.bar-row .bl{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:6px}
+.bar-row .bl b{font-weight:500}
+.track{background:var(--bg);border-radius:6px;height:22px;overflow:hidden}
+.fill{height:100%;border-radius:6px;background:var(--ok)}
+
+/* subsanacion banner */
+.subsan{display:flex;align-items:center;justify-content:space-around;flex-wrap:wrap;gap:18px;text-align:center}
+.subsan .s-l{font-size:12.5px;color:var(--ink-2);margin:0}
+.subsan .s-v{font-family:var(--font-display);font-weight:500;font-size:34px;line-height:1.05;margin:5px 0 0}
+.subsan .arrow{font-size:26px;color:var(--ink-3)}
+.subsan .resc{border-left:1px solid var(--line);padding-left:22px}
+
+/* heatmap */
+.hm{width:100%;border-collapse:separate;border-spacing:5px}
+.hm th{font-size:11.5px;font-weight:500;color:var(--ink-2);padding:2px 4px;text-align:center}
+.hm td{text-align:center;font-size:13px;padding:8px 4px;border-radius:6px;color:var(--ink)}
+.hm td.rl{text-align:left;font-size:13px;color:var(--ink);background:none;white-space:nowrap;padding-left:0}
+
+/* trazabilidad */
+.tz-wrap{overflow-x:auto}
+.tz{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
+.tz th{text-align:left;font-size:11.5px;font-weight:500;color:var(--ink-2);padding:9px 8px;border-bottom:1px solid var(--line-2)}
+.tz td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.pill{display:inline-block;font-size:11.5px;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.p-ok{background:var(--ok-soft);color:var(--ok-ink)}
+.p-obs{background:var(--obs-soft);color:var(--obs-ink)}
+.p-no{background:var(--no-soft);color:var(--no-ink)}
+.p-na{background:var(--bg);color:var(--ink-3)}
+.tz-note{font-size:12px;color:var(--ink-3);margin:10px 0 0}
+
+.foot{margin-top:22px;font-size:12.5px;color:var(--ink-3);line-height:1.55}
+
+:focus-visible{outline:2px solid var(--agua);outline-offset:2px}
+
+@media (max-width:760px){
+  .mast h1{font-size:30px}
+  .ledger{grid-template-columns:repeat(2,1fr)}
+  .cell:nth-child(3){border-left:none}
+  .cell:nth-child(n+3){border-top:1px solid var(--line)}
+  .grid{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mast">
+    <p class="eyebrow">Comisión Nacional de Riego · Concurso de fortalecimiento OUA</p>
+    <h1>Panel de admisibilidad</h1>
+    <p class="sub">Etapa de filtro formal — resultados de la evaluación de admisibilidad de las postulaciones.</p>
+  </header>
+
+  <div class="controls">
+    <div class="field"><label for="f-region">Región</label>
+      <select id="f-region"><option value="">Todas</option></select></div>
+    <div class="field"><label for="f-tipo">Tipo de OUA</label>
+      <select id="f-tipo"><option value="">Todas</option></select></div>
+    <div class="grow"></div>
+    <label class="btn primary" for="file"><span aria-hidden="true">↑</span> Cargar planilla (CSV)
+      <input id="file" type="file" accept=".csv,text/csv" style="display:none"></label>
+    <button class="btn" id="reset" type="button">Datos de ejemplo</button>
+  </div>
+  <p class="status" id="status"><span class="dot"></span><span id="status-txt">Datos de ejemplo</span></p>
+
+  <div class="ledger" id="ledger" aria-label="Indicadores principales"></div>
+
+  <div class="grid">
+    <section class="panel" id="p-veredicto">
+      <h3>Veredictos de admisibilidad</h3>
+      <div class="legend">
+        <span><span class="sw" style="background:var(--ok)"></span>Admisible</span>
+        <span><span class="sw" style="background:var(--obs)"></span>Con observaciones</span>
+        <span><span class="sw" style="background:var(--no)"></span>Inadmisible</span>
+      </div>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-donut" role="img" aria-label="Distribución de veredictos de admisibilidad."></canvas></div>
+    </section>
+
+    <section class="panel" id="p-tipo">
+      <h3>Admisibilidad por tipo de OUA</h3>
+      <div id="tipo-body"></div>
+    </section>
+
+    <section class="panel span2" id="p-region">
+      <h3>Admisibilidad por región</h3>
+      <div class="legend">
+        <span><span class="sw" style="background:var(--ok)"></span>Admisible</span>
+        <span><span class="sw" style="background:var(--obs)"></span>Con observaciones</span>
+        <span><span class="sw" style="background:var(--no)"></span>Inadmisible</span>
+      </div>
+      <div id="region-body"><div class="chart-wrap" id="region-wrap"><canvas id="c-region" role="img" aria-label="Admisibilidad por región, barras apiladas."></canvas></div></div>
+    </section>
+
+    <section class="panel span2" id="p-pareto">
+      <h3>Motivos de inadmisibilidad — Pareto</h3>
+      <div id="pareto-body"><div class="chart-wrap" style="height:300px"><canvas id="c-pareto" role="img" aria-label="Pareto de motivos de inadmisibilidad con porcentaje acumulado."></canvas></div></div>
+    </section>
+
+    <section class="panel span2" id="p-heatmap">
+      <h3>Cumplimiento por criterio</h3>
+      <div class="legend" id="hm-legend">
+        <span><span class="sw" style="background:var(--ok)"></span>Cumple</span>
+        <span><span class="sw" style="background:var(--obs)"></span>Subsanable</span>
+        <span><span class="sw" style="background:var(--no)"></span>No cumple</span>
+        <span><span class="sw" style="background:var(--ink-3)"></span>No determinable</span>
+      </div>
+      <div id="heatmap-body"></div>
+    </section>
+
+    <section class="panel span2" id="p-subsan" style="background:#F7F9F9">
+      <h3>Potencial de subsanación</h3>
+      <div class="subsan" id="subsan-body"></div>
+    </section>
+
+    <section class="panel span2" id="p-tz">
+      <h3>Trazabilidad de decisiones</h3>
+      <div id="tz-body"></div>
+    </section>
+  </div>
+
+  <p class="foot" id="foot"></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+"use strict";
+
+var C = { ok:'#1D9E75', obs:'#D98A0E', no:'#D24B43', okInk:'#0C5A43', obsInk:'#7A4D06', noInk:'#7E211C',
+          okSoft:'#E4F4EC', obsSoft:'#FAF0DA', noSoft:'#FBE7E5', na:'#8A949D', agua:'#0E6E7A',
+          ink2:'#54616C', line:'rgba(20,28,38,0.10)' };
+var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (window.Chart) { Chart.defaults.font.family = "'Public Sans',system-ui,sans-serif"; Chart.defaults.animation = REDUCED ? false : { duration: 500 }; }
+
+var charts = {};
+var FULL = [];        // all parsed rows (raw objects)
+var COLS = {};        // resolved column map
+var CRIT = [];        // detected criterion columns [{header, code}]
+
+/* ---------- helpers ---------- */
+function stripA(s){ return String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+function nm(s){ return stripA(s).toLowerCase().trim().replace(/\s+/g,' '); }
+function round(x){ return Math.round(x); }
+function pct(n,d){ return d ? round(n/d*100) : 0; }
+
+function normVer(v){
+  var t = nm(v);
+  if (!t) return 'SIN CLASIFICAR';
+  if (t.indexOf('inadmis') >= 0) return 'INADMISIBLE';
+  if (t.indexOf('observ') >= 0 || t.indexOf('subsan') >= 0 || t.indexOf('c/obs') >= 0 || t.indexOf('con obs') >= 0) return 'ADMISIBLE CON OBSERVACIONES';
+  if (t.indexOf('admis') >= 0) return 'ADMISIBLE';
+  return 'SIN CLASIFICAR';
+}
+function normEstado(v){
+  var t = nm(v);
+  if (t.indexOf('no determ') >= 0 || t === 'nd' || t === 's/i' || t === '') return 'NO DETERMINABLE';
+  if (t.indexOf('no cumple') >= 0 || t === 'nc' || t.indexOf('incumple') >= 0) return 'NO CUMPLE';
+  if (t.indexOf('subsan') >= 0) return 'SUBSANABLE';
+  if (t.indexOf('cumple') >= 0) return 'CUMPLE';
+  return 'NO DETERMINABLE';
+}
+function parseMonto(x){
+  var d = String(x == null ? '' : x).replace(/[^0-9]/g, '');
+  return d ? parseInt(d, 10) : 0;
+}
+var clp = new Intl.NumberFormat('es-CL');
+function mm(x){ return 'MM$ ' + (x/1e6).toLocaleString('es-CL', { maximumFractionDigits: 1 }); }
+
+var ALIASES = {
+  folio:    ['folio','id','n','nro','numero','n°','codigo','folio n°'],
+  oua:      ['oua','organizacion','nombre','postulante','solicitante','organizacion de usuarios'],
+  region:   ['region'],
+  tipo:     ['tipo_oua','tipo oua','tipo','clase','tipo de oua'],
+  monto:    ['monto_solicitado','monto solicitado','monto','solicitado','monto clp','monto $'],
+  veredicto:['veredicto','resultado','admisibilidad','estado','dictamen','resolucion'],
+  motivo:   ['motivo','motivo_principal','motivo principal','causal','observacion','causa','motivo de inadmisibilidad'],
+  clausula: ['clausula','base','referencia','numeral','articulo']
+};
+function resolveColumns(headers){
+  var hs = headers.map(function(h){ return { raw:h, n:nm(h) }; });
+  var map = {};
+  Object.keys(ALIASES).forEach(function(field){
+    var found = null;
+    ALIASES[field].forEach(function(a){
+      if (found) return;
+      var hit = hs.find(function(h){ return h.n === a; });
+      if (hit) found = hit.raw;
+    });
+    if (!found) {
+      ALIASES[field].forEach(function(a){
+        if (found) return;
+        var hit = hs.find(function(h){ return h.n.indexOf(a) >= 0; });
+        if (hit) found = hit.raw;
+      });
+    }
+    map[field] = found;
+  });
+  return map;
+}
+function detectCriteria(headers){
+  var out = [];
+  headers.forEach(function(h){
+    var n = nm(h);
+    if (/^[a-f] ?\d{1,2}$/.test(n) || n.indexOf('crit') === 0 || n.indexOf('criterio') === 0) {
+      out.push({ header:h, code: stripA(h).toUpperCase().replace(/\s+/g,'').slice(0,8) });
+    }
+  });
+  return out;
+}
+
+/* ---------- aggregation ---------- */
+function aggregate(rows){
+  var a = {
+    total: rows.length,
+    ver: { 'ADMISIBLE':0, 'ADMISIBLE CON OBSERVACIONES':0, 'INADMISIBLE':0, 'SIN CLASIFICAR':0 },
+    montoTotal:0, montoAdm:0,
+    byRegion:{}, byTipo:{}, motivos:{}, crit:{},
+    tz:[]
+  };
+  CRIT.forEach(function(c){ a.crit[c.code] = { 'CUMPLE':0,'SUBSANABLE':0,'NO CUMPLE':0,'NO DETERMINABLE':0 }; });
+
+  rows.forEach(function(r){
+    var v = COLS.veredicto ? normVer(r[COLS.veredicto]) : 'SIN CLASIFICAR';
+    a.ver[v] = (a.ver[v] || 0) + 1;
+
+    if (COLS.monto){ var m = parseMonto(r[COLS.monto]); a.montoTotal += m; if (v === 'ADMISIBLE') a.montoAdm += m; }
+
+    if (COLS.region){
+      var rg = String(r[COLS.region] || '—').trim() || '—';
+      var b = a.byRegion[rg] || (a.byRegion[rg] = { 'ADMISIBLE':0,'ADMISIBLE CON OBSERVACIONES':0,'INADMISIBLE':0, total:0 });
+      if (b[v] != null) b[v]++; b.total++;
+    }
+    if (COLS.tipo){
+      var tp = String(r[COLS.tipo] || '—').trim() || '—';
+      var t = a.byTipo[tp] || (a.byTipo[tp] = { adm:0, total:0 });
+      if (v === 'ADMISIBLE') t.adm++; t.total++;
+    }
+    if (COLS.motivo && v === 'INADMISIBLE'){
+      var mo = String(r[COLS.motivo] || '').trim();
+      if (mo) a.motivos[mo] = (a.motivos[mo] || 0) + 1;
+    }
+    CRIT.forEach(function(c){ var e = normEstado(r[c.header]); a.crit[c.code][e]++; });
+
+    a.tz.push({
+      folio:  COLS.folio ? (r[COLS.folio] || '—') : '—',
+      oua:    COLS.oua ? (r[COLS.oua] || '—') : '—',
+      region: COLS.region ? (r[COLS.region] || '—') : '—',
+      ver: v,
+      motivo: COLS.motivo ? (r[COLS.motivo] || '—') : '—',
+      clausula: COLS.clausula ? (r[COLS.clausula] || '—') : '—'
+    });
+  });
+  return a;
+}
+
+/* ---------- rendering ---------- */
+function destroy(id){ if (charts[id]) { charts[id].destroy(); charts[id] = null; } }
+
+function renderLedger(a){
+  var adm = a.ver['ADMISIBLE'], inad = a.ver['INADMISIBLE'], obs = a.ver['ADMISIBLE CON OBSERVACIONES'];
+  var montoCell = COLS.monto
+    ? '<p class="k-v">' + mm(a.montoAdm) + '</p><p class="k-s">de ' + mm(a.montoTotal) + '</p>'
+    : '<p class="k-v" style="color:var(--ink-3)">—</p><p class="k-s">sin columna de monto</p>';
+  document.getElementById('ledger').innerHTML =
+    '<div class="cell"><p class="k-l">Postulaciones</p><p class="k-v">' + a.total + '</p><p class="k-s">evaluadas</p></div>' +
+    '<div class="cell"><p class="k-l">Admisibles</p><p class="k-v" style="color:var(--ok-ink)">' + pct(adm,a.total) + '%</p><p class="k-s">' + adm + ' de ' + a.total + '</p></div>' +
+    '<div class="cell"><p class="k-l">Inadmisibles</p><p class="k-v" style="color:var(--no-ink)">' + pct(inad,a.total) + '%</p><p class="k-s">' + inad + ' de ' + a.total + '</p></div>' +
+    '<div class="cell"><p class="k-l">Monto admisible</p>' + montoCell + '</div>';
+}
+
+function renderDonut(a){
+  destroy('donut');
+  var data = [a.ver['ADMISIBLE'], a.ver['ADMISIBLE CON OBSERVACIONES'], a.ver['INADMISIBLE']];
+  charts.donut = new Chart(document.getElementById('c-donut'), {
+    type:'doughnut',
+    data:{ labels:['Admisible','Con observaciones','Inadmisible'],
+      datasets:[{ data:data, backgroundColor:[C.ok,C.obs,C.no], borderColor:'#fff', borderWidth:2 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{ legend:{ display:false },
+        tooltip:{ callbacks:{ label:function(c){ return c.label + ': ' + c.parsed + ' (' + pct(c.parsed,a.total) + '%)'; } } } } }
+  });
+}
+
+function renderTipo(a){
+  var body = document.getElementById('tipo-body');
+  if (!COLS.tipo){ body.innerHTML = '<div class="hint">Agrega una columna <b>tipo_oua</b> (junta de vigilancia, asociación de canalistas, comunidad de aguas) para ver este desglose.</div>'; return; }
+  var keys = Object.keys(a.byTipo).sort(function(x,y){ return a.byTipo[y].total - a.byTipo[x].total; });
+  var html = '<div class="bars">';
+  keys.forEach(function(k){
+    var t = a.byTipo[k], r = pct(t.adm, t.total);
+    html += '<div class="bar-row"><div class="bl"><span>' + esc(k) + '</span><b>' + r + '%</b></div>' +
+            '<div class="track"><div class="fill" style="width:' + r + '%"></div></div></div>';
+  });
+  body.innerHTML = html + '</div>';
+}
+
+function renderRegion(a){
+  var body = document.getElementById('region-body');
+  if (!COLS.region){ destroy('region'); body.innerHTML = '<div class="hint">Agrega una columna <b>region</b> (o cuenca) para ver el desglose territorial.</div>'; return; }
+  if (!document.getElementById('c-region')){
+    body.innerHTML = '<div class="chart-wrap" id="region-wrap"><canvas id="c-region" role="img" aria-label="Admisibilidad por región, barras apiladas."></canvas></div>';
+  }
+  var keys = Object.keys(a.byRegion).sort(function(x,y){ return a.byRegion[y].total - a.byRegion[x].total; });
+  document.getElementById('region-wrap').style.height = Math.max(220, keys.length * 38 + 70) + 'px';
+  destroy('region');
+  charts.region = new Chart(document.getElementById('c-region'), {
+    type:'bar',
+    data:{ labels:keys, datasets:[
+      { label:'Admisible', data:keys.map(function(k){ return a.byRegion[k]['ADMISIBLE']; }), backgroundColor:C.ok },
+      { label:'Con observaciones', data:keys.map(function(k){ return a.byRegion[k]['ADMISIBLE CON OBSERVACIONES']; }), backgroundColor:C.obs },
+      { label:'Inadmisible', data:keys.map(function(k){ return a.byRegion[k]['INADMISIBLE']; }), backgroundColor:C.no }
+    ]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:function(c){ return c.dataset.label + ': ' + c.parsed.x; } } } },
+      scales:{ x:{ stacked:true, beginAtZero:true, grid:{ color:C.line }, ticks:{ color:C.ink2, precision:0 } },
+               y:{ stacked:true, reverse:true, grid:{ display:false }, ticks:{ color:C.ink2 } } } }
+  });
+}
+
+function renderPareto(a){
+  var body = document.getElementById('pareto-body');
+  if (!COLS.motivo){ destroy('pareto'); body.innerHTML = '<div class="hint">Agrega una columna <b>motivo</b> (motivo principal de inadmisibilidad) para ver el Pareto.</div>'; return; }
+  var arr = Object.keys(a.motivos).map(function(k){ return { k:k, v:a.motivos[k] }; }).sort(function(x,y){ return y.v - x.v; });
+  if (!arr.length){ destroy('pareto'); body.innerHTML = '<div class="hint">No hay motivos registrados en las postulaciones inadmisibles del conjunto filtrado.</div>'; return; }
+  arr = arr.slice(0, 8);
+  var totalM = arr.reduce(function(s,d){ return s + d.v; }, 0), cum = 0;
+  var cumPct = arr.map(function(d){ cum += d.v; return round(cum/totalM*100); });
+  if (!document.getElementById('c-pareto')){ body.innerHTML = '<div class="chart-wrap" style="height:300px"><canvas id="c-pareto" role="img" aria-label="Pareto de motivos de inadmisibilidad."></canvas></div>'; }
+  destroy('pareto');
+  charts.pareto = new Chart(document.getElementById('c-pareto'), {
+    type:'bar',
+    data:{ labels: arr.map(function(d){ return d.k; }), datasets:[
+      { type:'bar', label:'Casos', data: arr.map(function(d){ return d.v; }), backgroundColor:C.agua, yAxisID:'y', order:2 },
+      { type:'line', label:'Acumulado', data: cumPct, borderColor:'#C0561E', backgroundColor:'#C0561E', borderWidth:2, pointRadius:3, tension:0, yAxisID:'y1', order:1 }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:function(c){ return c.dataset.yAxisID === 'y1' ? c.parsed.y + '% acumulado' : c.parsed.y + ' casos'; } } } },
+      scales:{ x:{ grid:{ display:false }, ticks:{ color:C.ink2, autoSkip:false, maxRotation:30, minRotation:0, callback:function(v){ var l = this.getLabelForValue(v); return l.length > 18 ? l.slice(0,17) + '…' : l; } } },
+               y:{ beginAtZero:true, grid:{ color:C.line }, ticks:{ color:C.ink2, precision:0 } },
+               y1:{ position:'right', beginAtZero:true, max:100, grid:{ drawOnChartArea:false }, ticks:{ color:C.ink2, callback:function(v){ return v + '%'; } } } } }
+  });
+}
+
+function hexA(hex,a){ var h = hex.replace('#',''); var r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16); return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')'; }
+function renderHeatmap(a){
+  var body = document.getElementById('heatmap-body');
+  var leg = document.getElementById('hm-legend');
+  if (!CRIT.length){ leg.style.display = 'none'; body.innerHTML = '<div class="hint">Para esta matriz, agrega una columna por criterio (encabezados <b>A1, B2, C1…</b>) con el estado de cada postulación: <i>cumple · subsanable · no cumple · no determinable</i>. El resto del panel funciona sin ella.</div>'; return; }
+  leg.style.display = 'flex';
+  var states = [['CUMPLE',C.ok],['SUBSANABLE',C.obs],['NO CUMPLE',C.no],['NO DETERMINABLE',C.na]];
+  var max = {}; states.forEach(function(s){ max[s[0]] = 1; CRIT.forEach(function(c){ max[s[0]] = Math.max(max[s[0]], a.crit[c.code][s[0]]); }); });
+  var html = '<table class="hm"><tr><th class="rl"></th>';
+  states.forEach(function(s){ html += '<th>' + cap(s[0]) + '</th>'; });
+  html += '</tr>';
+  CRIT.forEach(function(c){
+    html += '<tr><td class="rl">' + esc(c.code) + '</td>';
+    states.forEach(function(s){
+      var val = a.crit[c.code][s[0]];
+      var intensity = val === 0 ? 0 : 0.14 + 0.55 * (val / max[s[0]]);
+      var bg = val === 0 ? 'transparent' : hexA(s[1], intensity);
+      var txt = val === 0 ? '<span style="color:var(--ink-3)">·</span>' : val;
+      html += '<td style="background:' + bg + '">' + txt + '</td>';
+    });
+    html += '</tr>';
+  });
+  body.innerHTML = html + '</table>';
+}
+
+function renderSubsan(a){
+  var adm = a.ver['ADMISIBLE'], obs = a.ver['ADMISIBLE CON OBSERVACIONES'];
+  var actual = pct(adm, a.total), potencial = pct(adm + obs, a.total);
+  document.getElementById('subsan-body').innerHTML =
+    '<div><p class="s-l">Admisibilidad actual</p><p class="s-v">' + actual + '%</p></div>' +
+    '<div class="arrow" aria-hidden="true">→</div>' +
+    '<div><p class="s-l">Potencial con subsanación</p><p class="s-v" style="color:var(--ok-ink)">' + potencial + '%</p></div>' +
+    '<div class="resc"><p class="s-v" style="color:var(--obs-ink)">' + obs + '</p><p class="s-l">postulaciones rescatables</p></div>';
+}
+
+function renderTz(a){
+  var rank = { 'INADMISIBLE':0, 'ADMISIBLE CON OBSERVACIONES':1, 'SIN CLASIFICAR':2, 'ADMISIBLE':3 };
+  var rows = a.tz.slice().sort(function(x,y){ return (rank[x.ver] - rank[y.ver]); });
+  var cap = 60, shown = rows.slice(0, cap);
+  var pillCls = { 'ADMISIBLE':'p-ok', 'ADMISIBLE CON OBSERVACIONES':'p-obs', 'INADMISIBLE':'p-no', 'SIN CLASIFICAR':'p-na' };
+  var pillTxt = { 'ADMISIBLE':'Admisible', 'ADMISIBLE CON OBSERVACIONES':'C/observ.', 'INADMISIBLE':'Inadmisible', 'SIN CLASIFICAR':'Sin clasif.' };
+  var html = '<div class="tz-wrap"><table class="tz"><tr><th style="width:9%">Folio</th><th style="width:26%">OUA</th><th style="width:15%">Región</th><th style="width:17%">Veredicto</th><th style="width:21%">Motivo</th><th style="width:12%">Cláusula</th></tr>';
+  shown.forEach(function(r){
+    html += '<tr><td>' + esc(r.folio) + '</td><td>' + esc(r.oua) + '</td><td>' + esc(r.region) + '</td>' +
+            '<td><span class="pill ' + pillCls[r.ver] + '">' + pillTxt[r.ver] + '</span></td>' +
+            '<td>' + esc(r.ver === 'ADMISIBLE' ? '—' : r.motivo) + '</td><td>' + esc(r.ver === 'ADMISIBLE' ? '—' : r.clausula) + '</td></tr>';
+  });
+  html += '</table></div>';
+  if (rows.length > cap) html += '<p class="tz-note">Mostrando ' + cap + ' de ' + rows.length + ' postulaciones (inadmisibles y observadas primero).</p>';
+  document.getElementById('tz-body').innerHTML = html;
+}
+
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+function cap(s){ s = s.toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function renderAll(rows){
+  try {
+    var a = aggregate(rows);
+    renderLedger(a); renderDonut(a); renderTipo(a); renderRegion(a);
+    renderPareto(a); renderHeatmap(a); renderSubsan(a); renderTz(a);
+    var miss = a.ver['SIN CLASIFICAR'];
+    document.getElementById('foot').innerHTML =
+      'Los porcentajes se calculan sobre el conjunto filtrado (' + a.total + ' postulaciones). ' +
+      (miss ? '<b>' + miss + '</b> fila(s) no se pudieron clasificar por veredicto — revisa esos valores. ' : '') +
+      'El Pareto usa el motivo principal por postulación, por lo que suma el total de inadmisibles.';
+  } catch (e){
+    document.getElementById('foot').innerHTML = 'Ocurrió un problema al procesar los datos: ' + esc(e.message) + '. Revisa que el CSV tenga encabezados en la primera fila.';
+  }
+}
+
+/* ---------- filters ---------- */
+function uniq(field){
+  var col = COLS[field]; if (!col) return [];
+  var set = {}; FULL.forEach(function(r){ var v = String(r[col] || '').trim(); if (v) set[v] = 1; });
+  return Object.keys(set).sort(function(a,b){ return a.localeCompare(b, 'es'); });
+}
+function fillFilters(){
+  var rg = document.getElementById('f-region'), tp = document.getElementById('f-tipo');
+  rg.innerHTML = '<option value="">Todas</option>'; tp.innerHTML = '<option value="">Todas</option>';
+  uniq('region').forEach(function(v){ rg.insertAdjacentHTML('beforeend', '<option>' + esc(v) + '</option>'); });
+  uniq('tipo').forEach(function(v){ tp.insertAdjacentHTML('beforeend', '<option>' + esc(v) + '</option>'); });
+  rg.disabled = !COLS.region; tp.disabled = !COLS.tipo;
+}
+function applyFilters(){
+  var rg = document.getElementById('f-region').value, tp = document.getElementById('f-tipo').value;
+  var rows = FULL.filter(function(r){
+    if (rg && COLS.region && String(r[COLS.region] || '').trim() !== rg) return false;
+    if (tp && COLS.tipo && String(r[COLS.tipo] || '').trim() !== tp) return false;
+    return true;
+  });
+  renderAll(rows);
+}
+
+function load(rows, headers, label){
+  FULL = rows; COLS = resolveColumns(headers); CRIT = detectCriteria(headers);
+  fillFilters();
+  document.getElementById('status-txt').textContent = label;
+  renderAll(FULL);
+}
+
+document.getElementById('file').addEventListener('change', function(e){
+  var f = e.target.files[0]; if (!f) return;
+  Papa.parse(f, { header:true, skipEmptyLines:true, transformHeader:function(h){ return h.trim(); },
+    complete:function(res){
+      var headers = res.meta.fields || [];
+      if (!headers.length || !res.data.length){ document.getElementById('status-txt').textContent = 'No se leyeron filas — revisa el CSV.'; return; }
+      load(res.data, headers, f.name + ' — ' + res.data.length + ' filas');
+      document.getElementById('f-region').value = ''; document.getElementById('f-tipo').value = '';
+    },
+    error:function(err){ document.getElementById('status-txt').textContent = 'Error al leer: ' + err.message; }
+  });
+});
+['f-region','f-tipo'].forEach(function(id){ document.getElementById(id).addEventListener('change', applyFilters); });
+document.getElementById('reset').addEventListener('click', function(){
+  var s = buildSample(); load(s.rows, s.headers, 'Datos de ejemplo'); document.getElementById('file').value = '';
+});
+
+/* ---------- sample data (deterministic) ---------- */
+function buildSample(){
+  var headers = ['folio','oua','region','tipo_oua','monto_solicitado','veredicto','motivo','clausula','A1','B1','B2','C1','D1','E1'];
+  var regionsData = [
+    { region:'Coquimbo', adm:12, obs:5, inadm:11 },
+    { region:'Valparaíso', adm:14, obs:4, inadm:6 },
+    { region:'Metropolitana', adm:13, obs:3, inadm:6 },
+    { region:"O'Higgins", adm:12, obs:4, inadm:4 },
+    { region:'Maule', adm:11, obs:3, inadm:4 },
+    { region:'Ñuble', adm:7, obs:2, inadm:3 },
+    { region:'Biobío', adm:6, obs:1, inadm:3 },
+    { region:'Atacama', adm:3, obs:1, inadm:4 }
+  ];
+  var tipos = ['Junta de vigilancia','Asociación de canalistas','Comunidad de aguas'];
+  var montos = { 'Junta de vigilancia':48000000, 'Asociación de canalistas':32000000, 'Comunidad de aguas':22000000 };
+  // motivo principal -> criterio que falla
+  var inadPool = [
+    { m:'Certificado de vigencia faltante', c:'B2', n:12, cl:'4.2 b)' },
+    { m:'Fuera de plazo de postulación', c:'C1', n:9, cl:'3.4' },
+    { m:'Personería del representante no acreditada', c:'B1', n:8, cl:'4.1' },
+    { m:'Deuda pendiente con la CNR', c:'D1', n:5, cl:'6.3' },
+    { m:'Excede el monto máximo', c:'E1', n:4, cl:'5.2' },
+    { m:'Formulario de postulación incompleto', c:'A1', n:3, cl:'4.5' }
+  ];
+  var inadList = [];
+  inadPool.forEach(function(p){ for (var i=0;i<p.n;i++) inadList.push(p); });
+  var obsPool = [
+    { m:'Falta firma en anexo (subsanable)', c:'B1', cl:'5.1' },
+    { m:'Documento ilegible (subsanable)', c:'B2', cl:'5.1' }
+  ];
+
+  var rows = [], folio = 100, ti = 0, ii = 0, oi = 0, ndCount = 0;
+  function baseCrit(){ return { A1:'Cumple', B1:'Cumple', B2:'Cumple', C1:'Cumple', D1:'Cumple', E1:'Cumple' }; }
+  regionsData.forEach(function(rd){
+    function add(kind){
+      folio++; ti = (ti + 1) % tipos.length;
+      var tipo = tipos[ti], cr = baseCrit(), ver, motivo = '', cl = '';
+      if (kind === 'inadm'){ var p = inadList[ii % inadList.length]; ii++; ver = 'Inadmisible'; motivo = p.m; cl = p.cl; cr[p.c] = 'No cumple'; }
+      else if (kind === 'obs'){ var q = obsPool[oi % obsPool.length]; oi++; ver = 'Admisible con observaciones'; motivo = q.m; cl = q.cl; cr[q.c] = 'Subsanable'; }
+      else { ver = 'Admisible'; if (ndCount < 5){ cr.E1 = 'No determinable'; ndCount++; } }
+      rows.push({ folio: String(folio), oua: tipo.split(' ')[0] + ' ' + rd.region, region: rd.region, tipo_oua: tipo,
+        monto_solicitado: String(montos[tipo]), veredicto: ver, motivo: motivo, clausula: cl,
+        A1:cr.A1, B1:cr.B1, B2:cr.B2, C1:cr.C1, D1:cr.D1, E1:cr.E1 });
+    }
+    var i;
+    for (i=0;i<rd.adm;i++) add('adm');
+    for (i=0;i<rd.obs;i++) add('obs');
+    for (i=0;i<rd.inadm;i++) add('inadm');
+  });
+  return { rows: rows, headers: headers };
+}
+
+/* ---------- init ---------- */
+(function init(){
+  var s = buildSample();
+  load(s.rows, s.headers, 'Datos de ejemplo');
+})();
+</script>
+</body>
+</html>
